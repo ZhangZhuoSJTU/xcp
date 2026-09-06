@@ -1,0 +1,4 @@
+# macOS: xcp's simplelog TermLogger (ColorChoice::Auto) emits ANSI color that
+# the benchmark containers did not, breaking substring assertions on [INFO]
+# log lines. NO_COLOR forces termcolor to Never on both, matching the golden.
+export NO_COLOR=1
