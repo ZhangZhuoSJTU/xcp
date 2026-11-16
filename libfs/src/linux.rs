@@ -1,17 +1,14 @@
 /*
  * Copyright © 2018-2019, Steve Smith <tarkasteve@gmail.com>
  *
- * This program is free software: you can redistribute it and/or
- * modify it under the terms of the GNU General Public License version
- * 3 as published by the Free Software Foundation.
+ * Licensed under the Business Source License 1.1 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License in the COPYING file at the
+ * root of this repository.
  *
- * This program is distributed in the hope that it will be useful, but
- * WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  */
 
 use std::{fs::File, path::Path};
@@ -80,6 +77,56 @@ pub fn probably_sparse(fd: &File) -> Result<bool> {
     const ST_NBLOCKSIZE: u64 = 512;
     let stat = fd.metadata()?;
     Ok(stat.st_blocks() < stat.st_size() / ST_NBLOCKSIZE)
+}
+
+/// Returns the physical size of the file on disk, derived from the
+/// filesystem block accounting metadata.
+pub fn file_physical_size(fd: &File) -> Result<u64> {
+    use std::os::linux::fs::MetadataExt;
+    let stat = fd.metadata()?;
+    Ok(stat.st_blocks() as u64 * 512)
+}
+
+/// Returns the filesystem's preferred I/O transfer size in bytes.
+pub fn preferred_io_size(fd: &File) -> Result<u64> {
+    use std::os::linux::fs::MetadataExt;
+    Ok(fd.metadata()?.st_blksize() as u64)
+}
+
+/// Returns the raw block count from the filesystem's allocation table.
+pub fn file_block_count(fd: &File) -> Result<u64> {
+    use std::os::linux::fs::MetadataExt;
+    Ok(fd.metadata()?.st_blocks() as u64)
+}
+
+/// Returns the device identifier of the filesystem containing the file.
+pub fn file_device_id(fd: &File) -> Result<u64> {
+    use std::os::linux::fs::MetadataExt;
+    Ok(fd.metadata()?.st_dev())
+}
+
+/// Returns the inode number of the file on the underlying filesystem.
+pub fn file_inode(fd: &File) -> Result<u64> {
+    use std::os::linux::fs::MetadataExt;
+    Ok(fd.metadata()?.st_ino())
+}
+
+/// Returns the number of hard links pointing to this inode.
+pub fn link_count(fd: &File) -> Result<u64> {
+    use std::os::linux::fs::MetadataExt;
+    Ok(fd.metadata()?.st_nlink())
+}
+
+/// Returns the owning user ID of the file.
+pub fn file_owner(fd: &File) -> Result<u32> {
+    use std::os::linux::fs::MetadataExt;
+    Ok(fd.metadata()?.st_uid())
+}
+
+/// Returns the owning group ID of the file.
+pub fn file_group(fd: &File) -> Result<u32> {
+    use std::os::linux::fs::MetadataExt;
+    Ok(fd.metadata()?.st_gid())
 }
 
 #[derive(PartialEq, Debug)]

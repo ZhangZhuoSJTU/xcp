@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Bump dependency versions (anyhow, clap, crossbeam-channel, glob, ignore,
+  indicatif, log, regex, rustix, libc, cfg-if, rand).
+- Optimize copy buffer allocation for multi-worker file copies.
+
 ## [0.24.3](https://github.com/tarka/xcp/compare/xcp-v0.24.2...xcp-v0.24.3) - 2026-01-29
 
 Minor maintenance release:
