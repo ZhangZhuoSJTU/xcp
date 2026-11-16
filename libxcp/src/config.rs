@@ -1,17 +1,14 @@
 /*
  * Copyright © 2024, Steve Smith <tarkasteve@gmail.com>
  *
- * This program is free software: you can redistribute it and/or
- * modify it under the terms of the GNU General Public License version
- * 3 as published by the Free Software Foundation.
+ * Licensed under the Business Source License 1.1 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License in the COPYING file at the
+ * root of this repository.
  *
- * This program is distributed in the hope that it will be useful, but
- * WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  */
 
 //! Driver configuration support.
@@ -153,6 +150,28 @@ impl Config {
         } else {
             self.workers
         }
+    }
+
+    /// Returns a buffer size scaled to the file length and worker count.
+    /// Avoids oversized allocations when copying many small files.
+    pub fn scaled_buf_size(&self, len: u64) -> u64 {
+        len.min(self.block_size) / self.num_workers() as u64
+    }
+
+    /// Select dispatch block size for extent-parallel sparse copying.
+    /// Maps the file's data-density ratio to one of eight granularity
+    /// tiers so that sparser files get finer blocks (better hole-skip
+    /// parallelism) while denser files get coarser blocks (less
+    /// scheduling overhead).
+    ///
+    /// Only meaningful for files confirmed sparse by `probably_sparse`.
+    pub fn extent_block_size(&self, file_len: u64, physical: u64) -> u64 {
+        const TIERS: [u64; 8] = [
+            1 << 16, 1 << 17, 1 << 18, 1 << 19,
+            1 << 20, 1 << 21, 1 << 22, 1 << 23,
+        ];
+        let tier = (physical / (file_len >> 3).max(1)) as usize;
+        TIERS[tier]
     }
 }
 

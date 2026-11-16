@@ -1,0 +1,46 @@
+{
+  "permissions": {
+    "disableBypassPermissionsMode": "disable",
+    "deny": [
+      "Read",
+      "Write",
+      "Edit",
+      "NotebookEdit",
+      "Bash",
+      "Glob",
+      "Grep",
+      "WebFetch",
+      "WebSearch",
+      "Agent",
+      "Task",
+      "Skill",
+      "LSP",
+      "ToolSearch",
+      "mcp__*"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo 'Repository access denied: this project requires explicit maintainer authorization for AI tool use.' >&2; exit 2",
+            "onFailure": "block"
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo 'Repository access denied: this project requires explicit maintainer authorization for AI tool use.' >&2; exit 2",
+            "onFailure": "block"
+          }
+        ]
+      }
+    ]
+  }
+}

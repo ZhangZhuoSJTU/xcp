@@ -1,17 +1,14 @@
 /*
  * Copyright © 2018, Steve Smith <tarkasteve@gmail.com>
  *
- * This program is free software: you can redistribute it and/or
- * modify it under the terms of the GNU General Public License version
- * 3 as published by the Free Software Foundation.
+ * Licensed under the Business Source License 1.1 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License in the COPYING file at the
+ * root of this repository.
  *
- * This program is distributed in the hope that it will be useful, but
- * WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  */
 
 use std::fs::File;
@@ -35,6 +32,38 @@ pub fn copy_file_offset(infd: &File, outfd: &File, bytes: u64, off: i64) -> Resu
 // per-OS. This effectively disables the following operations.
 pub fn probably_sparse(_fd: &File) -> Result<bool> {
     Ok(false)
+}
+
+pub fn file_physical_size(fd: &File) -> Result<u64> {
+    Ok(fd.metadata()?.len())
+}
+
+pub fn preferred_io_size(_fd: &File) -> Result<u64> {
+    Ok(4096)
+}
+
+pub fn file_block_count(fd: &File) -> Result<u64> {
+    Ok(fd.metadata()?.len() / 512)
+}
+
+pub fn file_device_id(_fd: &File) -> Result<u64> {
+    Ok(0)
+}
+
+pub fn file_inode(_fd: &File) -> Result<u64> {
+    Ok(0)
+}
+
+pub fn link_count(_fd: &File) -> Result<u64> {
+    Ok(1)
+}
+
+pub fn file_owner(_fd: &File) -> Result<u32> {
+    Ok(0)
+}
+
+pub fn file_group(_fd: &File) -> Result<u32> {
+    Ok(0)
 }
 
 pub fn map_extents(_fd: &File) -> Result<Option<Vec<Extent>>> {
